@@ -11,7 +11,7 @@ except Exception:
     pass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import TEST_SET_PATH
+from config import TEST_SET_PATH, GEMINI_API_KEY, GEMINI_BASE_URL, GEMINI_MODEL, GEMINI_EMBEDDING_MODEL
 
 
 @dataclass
@@ -44,8 +44,18 @@ def evaluate_ragas(questions: list[str], answers: list[str],
             "question": questions, "answer": answers,
             "contexts": contexts, "ground_truth": ground_truths,
         })
+
+        eval_kwargs = {}
+        if GEMINI_API_KEY:
+            # Gemini's OpenAI-compatible endpoint lets RAGAS keep using its
+            # langchain-openai wrappers, just pointed at Gemini instead of OpenAI.
+            from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+            eval_kwargs["llm"] = ChatOpenAI(model=GEMINI_MODEL, api_key=GEMINI_API_KEY, base_url=GEMINI_BASE_URL)
+            eval_kwargs["embeddings"] = OpenAIEmbeddings(
+                model=GEMINI_EMBEDDING_MODEL, api_key=GEMINI_API_KEY, base_url=GEMINI_BASE_URL)
+
         result = evaluate(dataset, metrics=[faithfulness, answer_relevancy,
-                                            context_precision, context_recall])
+                                            context_precision, context_recall], **eval_kwargs)
         df = result.to_pandas()
         per_question = [EvalResult(question=row["question"], answer=row["answer"],
             contexts=row["contexts"], ground_truth=row["ground_truth"],

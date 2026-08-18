@@ -6,7 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- API Keys ---
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+# Gemini exposes an OpenAI-compatible endpoint, so the `openai` SDK / langchain-openai
+# wrappers keep working unchanged — just point base_url here and use a Gemini model name.
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+GEMINI_MODEL = "gemini-3.6-flash"
+GEMINI_EMBEDDING_MODEL = "text-embedding-004"
 
 # --- Qdrant ---
 QDRANT_HOST = "localhost"
