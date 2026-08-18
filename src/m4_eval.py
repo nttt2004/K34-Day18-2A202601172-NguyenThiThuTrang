@@ -5,6 +5,11 @@ from __future__ import annotations
 import os, sys, json
 from dataclasses import dataclass
 
+try:  # Avoid UnicodeEncodeError crashing the except-block itself on non-UTF-8 consoles (e.g. Windows cp1252)
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import TEST_SET_PATH
 
