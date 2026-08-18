@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.m1_chunking import load_documents, chunk_hierarchical
 from src.m2_search import HybridSearch
-from src.m3_rerank import CrossEncoderReranker
+from src.m3_rerank import FlashrankReranker
 from src.m4_eval import load_test_set, evaluate_ragas, failure_analysis, save_report
 from src.m5_enrichment import enrich_chunks
 from config import RERANK_TOP_K
@@ -51,13 +51,13 @@ def build_pipeline():
     # Step 4: Reranker (M3)
     t0 = time.time()
     print("\n[4/4] Loading reranker...", flush=True)
-    reranker = CrossEncoderReranker()
+    reranker = FlashrankReranker()
     print(f"  ✓ Reranker ready ({time.time()-t0:.1f}s)", flush=True)
 
     return search, reranker
 
 
-def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) -> tuple[str, list[str]]:
+def run_query(query: str, search: HybridSearch, reranker: FlashrankReranker) -> tuple[str, list[str]]:
     """Run single query through pipeline."""
     results = search.search(query)
     docs = [{"text": r.text, "score": r.score, "metadata": r.metadata} for r in results]
@@ -83,7 +83,7 @@ def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) 
     return answer, contexts
 
 
-def evaluate_pipeline(search: HybridSearch, reranker: CrossEncoderReranker):
+def evaluate_pipeline(search: HybridSearch, reranker: FlashrankReranker):
     """Run evaluation on test set."""
     test_set = load_test_set()
     print(f"\n[Eval] Running {len(test_set)} queries...", flush=True)
